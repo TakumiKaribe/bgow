@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
+
+	"bgow/view"
 
 	"github.com/fatih/color"
 	"github.com/jroimartin/gocui"
 )
 
-func main() {
+func checkAvailable() {
 	_, err := exec.Command("brew", "help").Output()
 
 	if err != nil {
@@ -19,6 +20,10 @@ func main() {
 		color.New(color.FgYellow).Add(color.Bold).Println("/usr/bin/ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\"")
 		os.Exit(1)
 	}
+}
+
+func main() {
+	checkAvailable()
 
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
@@ -39,39 +44,17 @@ func main() {
 }
 
 func layout(g *gocui.Gui) error {
-	maxX, maxY := g.Size()
+	fl := view.NewFormulaList()
+	fl.SetView(g)
 
-	if v, err := g.SetView("list", 0, 0, maxX/2-1, maxY/2-1); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		out, _ := exec.Command("brew", "list").Output()
-		fmt.Fprintln(v, string(out))
-	}
+	cl := view.NewCaskList()
+	cl.SetView(g)
 
-	if v, err := g.SetView("cask list", 0, maxY/2, maxX/2-1, maxY-1); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		out, _ := exec.Command("brew", "cask", "list").Output()
-		fmt.Fprintln(v, string(out))
-	}
+	sf := view.NewSearchField()
+	sf.SetView(g)
 
-	if v, err := g.SetView("searchField", maxX/2, 0, maxX-1, 2); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		fmt.Fprintln(v, "")
-	}
-
-	if v, err := g.SetView("searchResult", maxX/2, 3, maxX-1, maxY-1); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		// out, _ := exec.Command("brew", "search", "go").Output()
-		// fmt.Fprintln(v, string(out))
-		fmt.Fprintln(v, "")
-	}
+	sr := view.NewSearchResult()
+	sr.SetView(g)
 
 	return nil
 }
