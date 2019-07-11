@@ -44,17 +44,10 @@ func main() {
 }
 
 func layout(g *gocui.Gui) error {
-	fl := view.NewFormulaList()
-	fl.SetView(g)
-
-	cl := view.NewCaskList()
-	cl.SetView(g)
-
-	sf := view.NewSearchField()
-	sf.SetView(g)
-
-	sr := view.NewSearchResult()
-	sr.SetView(g)
+	views := []view.View{view.NewFormulaList(), view.NewCaskList(), view.NewSearchField(), view.NewSearchResult()}
+	for _, v := range views {
+		v.SetView(g)
+	}
 
 	return nil
 }
